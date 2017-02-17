@@ -17,6 +17,7 @@ def login(username, password):
 #   ================================      step 1      ==================================
 def saveAllArticlesInPage():
     saveItems = browser.find_elements_by_xpath('//*[contains(@id, "gs_svl")]')
+    print("got " + str(len(saveItems)) + " articles")
     for item in saveItems:
         functionString = item.get_attribute('onclick')[7:]
         browser.execute_script(functionString)
@@ -89,10 +90,59 @@ def getArticleInfoFromCitationLink(link):
 
 def getArticleInfoList(linkArray):
     result = []
+
+    count = 0
+    total = len(linkArray)
+    
     for link in linkArray:
         info = getArticleInfoFromCitationLink(link)
         result.append(info)
+
+        count += 1
+        print(str(count/total) + " %")
+
     return result
+
+def saveArticleInfo(infoList, fileName):
+    file = open('files/' + fileName + '.json', 'w')
+    file.write(str(infoList))
+    file.close()
+    print("saved info in " + 'files/' + fileName + '.json')
+#   ================================      step 4      ==================================
+def removeArticlesFromLibrary():
+    browser.get("https://scholar.google.com/scholar?start=0&hl=en&as_sdt=0,5&scilib=1")
+    print("removing from library")
+    count = 0
+    while(True):
+        try:
+            browser.find_element_by_id("gs_ab_x_all").click()
+            browser.find_element_by_id("gs_ab_del").click()
+            count += 20
+            print("removed " + str(count) + " articles")
+        except:
+            print("removed " + str(count) + " articles from my library")
+            break
+
+def remvoeForEver():
+    browser.get("https://scholar.google.com/scholar?hl=en&num=20&as_sdt=0,5&scilib=3")
+    count = 0
+    while(True):
+        try:
+            browser.find_element_by_id("gs_ab_x_all").click()
+            browser.find_element_by_id("gs_ab_del_fevr").click()
+            count += 20
+            print("removed " + str(count) + " articles")
+        except:
+            print("removed " + str(count) + " articles from my library")
+            break
+#   ================================      step 4      ==================================
+def completedProgress(searchIndex, articleCount=100):
+    startSaveingArticles(searchIndex, articleCount)
+    linkArray = getLibraryArticleLinks()
+    authorList = getArticleInfoList()
+    saveArticleInfo(authorList, searchIndex)
+    removeArticlesFromLibrary()
+    remvoeForEver()
 
 login("bidelsorkh", "ad2yesh1996")
 print("imported ex Lib")
